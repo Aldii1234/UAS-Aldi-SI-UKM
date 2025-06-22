@@ -24,25 +24,24 @@ export default function LoginPage() {
     const data = await res.json()
 
     if (res.ok && data.user) {
-  Swal.fire('Berhasil Login!', '', 'success')
+      Swal.fire('Berhasil Login!', '', 'success')
+      localStorage.setItem('user', JSON.stringify(data.user))
 
-  localStorage.setItem('user', JSON.stringify(data.user))
-
-  switch (data.user.role) {
-    case 'admin':
-      router.push('/dashboard/admin')
-      break
-    case 'pengurus':
-      router.push('/dashboard/pengurus')
-      break
-    case 'mahasiswa':
-    default:
-      router.push('/dashboard/mahasiswa')
-      break
-  }
-} else {
-  Swal.fire('Gagal Login', data.message || 'Email atau password salah.', 'error')
-}
+      switch (data.user.role) {
+        case 'admin':
+          router.push('/dashboard/admin')
+          break
+        case 'pengurus':
+          router.push('/dashboard/pengurus')
+          break
+        case 'mahasiswa':
+        default:
+          router.push('/dashboard/mahasiswa')
+          break
+      }
+    } else {
+      Swal.fire('Gagal Login', data.message || 'Email atau password salah.', 'error')
+    }
   }
 
   return (
@@ -80,6 +79,23 @@ export default function LoginPage() {
             Daftar di sini
           </a>
         </p>
+
+        {/* ✅ Tambahan Catatan Login */}
+        <div className="mt-6 bg-sky-50 border border-sky-200 text-sm text-gray-700 p-4 rounded-lg">
+          <p className="font-semibold text-sky-700 mb-2">🔐 Akun Demo:</p>
+          <ul className="list-disc pl-5 space-y-1">
+            <li>
+              <span className="font-medium">Admin:</span><br />
+              Email: <code>admin@gmail.com</code><br />
+              Password: <code>admin123</code>
+            </li>
+            <li>
+              <span className="font-medium">Pengurus:</span><br />
+              Email: <code>pengurus@gmail.com</code><br />
+              Password: <code>pengurus</code>
+            </li>
+          </ul>
+        </div>
       </form>
     </main>
   )
