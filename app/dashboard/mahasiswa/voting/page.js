@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import Swal from 'sweetalert2'
 import { useRouter } from 'next/navigation'
+import { FaThumbsUp, FaThumbsDown } from 'react-icons/fa'
 
 export default function VotingPage() {
   const [user, setUser] = useState(null)
@@ -46,7 +47,7 @@ export default function VotingPage() {
       if (res.ok) {
         const votes = {}
         data.forEach(v => {
-          votes[v.kegiatanId] = v.vote // 'setuju' / 'tidak'
+          votes[v.kegiatanId] = v.vote
         })
         setUserVotes(votes)
       }
@@ -91,39 +92,40 @@ export default function VotingPage() {
         ) : (
           <ul className="space-y-4">
             {kegiatanList.map((kegiatan) => (
-              <li key={kegiatan._id} className="border rounded-lg p-4 shadow-sm">
+              <li key={kegiatan._id} className="border rounded-lg p-5 shadow-sm bg-sky-50 hover:bg-sky-100 transition">
                 <h2 className="text-lg font-bold text-blue-800">{kegiatan.judul}</h2>
                 <p className="text-sm text-gray-600">{kegiatan.deskripsi}</p>
                 <p className="text-xs text-gray-500 mt-1">Tanggal: {new Date(kegiatan.tanggal).toLocaleDateString()}</p>
                 <p className="text-xs italic text-gray-400">UKM: {kegiatan.ukmId?.name || 'Tidak tersedia'}</p>
 
-                <div className="mt-3 flex gap-2 flex-wrap">
+                <div className="mt-4 flex flex-wrap items-center gap-3">
                   <button
                     onClick={() => handleVote(kegiatan._id, 'setuju')}
                     disabled={userVotes[kegiatan._id]}
-                    className={`px-3 py-1 rounded text-sm ${
+                    className={`flex items-center gap-2 px-4 py-1 rounded-lg text-sm font-semibold transition duration-200 ${
                       userVotes[kegiatan._id] === 'setuju'
-                        ? 'bg-green-500 text-white'
-                        : 'bg-green-100 hover:bg-green-200 text-green-700'
+                        ? 'bg-green-600 text-white'
+                        : 'bg-green-100 text-green-700 hover:bg-green-200'
                     }`}
                   >
-                    👍 Setuju
+                    <FaThumbsUp /> Setuju
                   </button>
+
                   <button
                     onClick={() => handleVote(kegiatan._id, 'tidak')}
                     disabled={userVotes[kegiatan._id]}
-                    className={`px-3 py-1 rounded text-sm ${
+                    className={`flex items-center gap-2 px-4 py-1 rounded-lg text-sm font-semibold transition duration-200 ${
                       userVotes[kegiatan._id] === 'tidak'
-                        ? 'bg-red-500 text-white'
-                        : 'bg-red-100 hover:bg-red-200 text-red-700'
+                        ? 'bg-red-600 text-white'
+                        : 'bg-red-100 text-red-700 hover:bg-red-200'
                     }`}
                   >
-                    👎 Tidak Setuju
+                    <FaThumbsDown /> Tidak Setuju
                   </button>
 
                   {userVotes[kegiatan._id] && (
-                    <span className="text-sm text-gray-500 ml-2 italic">
-                      Anda memilih: {userVotes[kegiatan._id]}
+                    <span className="text-sm text-gray-600 italic ml-2">
+                      Anda memilih: <span className="font-semibold">{userVotes[kegiatan._id]}</span>
                     </span>
                   )}
                 </div>

@@ -90,6 +90,11 @@ export default function LoginPage() {
               Password: <code>admin123</code>
             </li>
             <li>
+              <span className="font-medium">User:</span><br />
+              Email: <code>abdullah@gmail.com</code><br />
+              Password: <code>123456</code>
+            </li>
+            <li>
               <span className="font-medium">Pengurus:</span><br />
               Email: <code>pengurus@gmail.com</code><br />
               Password: <code>pengurus</code>

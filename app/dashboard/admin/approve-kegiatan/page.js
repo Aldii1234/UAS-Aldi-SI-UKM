@@ -3,11 +3,18 @@
 import { useEffect, useState } from 'react'
 import Swal from 'sweetalert2'
 import { useRouter } from 'next/navigation'
-import { FaCheckCircle, FaTimesCircle, FaArrowLeft } from 'react-icons/fa'
+import {
+  FaCheckCircle,
+  FaTimesCircle,
+  FaArrowLeft,
+  FaSearch
+} from 'react-icons/fa'
 
 export default function ApproveKegiatanPage() {
   const [user, setUser] = useState(null)
   const [kegiatanList, setKegiatanList] = useState([])
+  const [search, setSearch] = useState('')
+  const [filterStatus, setFilterStatus] = useState('semua')
   const router = useRouter()
 
   useEffect(() => {
@@ -56,55 +63,98 @@ export default function ApproveKegiatanPage() {
     }
   }
 
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case 'disetujui':
+        return <span className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">Disetujui</span>
+      case 'ditolak':
+        return <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-medium">Ditolak</span>
+      default:
+        return <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-medium">Menunggu</span>
+    }
+  }
+
+  const filteredList = kegiatanList.filter((k) => {
+    const cocokJudul = k.judul.toLowerCase().includes(search.toLowerCase())
+    const cocokStatus =
+      filterStatus === 'semua' || k.status === filterStatus
+    return cocokJudul && cocokStatus
+  })
+
   if (!user) return null
 
   return (
     <main className="min-h-screen bg-green-50 p-6">
-      <div className="max-w-5xl mx-auto bg-white p-8 rounded-xl shadow">
-        <button
-          onClick={() => router.push('/dashboard/admin')}
-          className="text-green-700 hover:text-green-900 mb-4 flex items-center gap-2"
-        >
-          <FaArrowLeft /> Kembali ke Dashboard
-        </button>
+      <div className="max-w-5xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
+        <div className="flex items-center justify-between mb-6">
+          <button
+            onClick={() => router.push('/dashboard/admin')}
+            className="flex items-center gap-2 text-green-700 hover:text-green-900 font-medium"
+          >
+            <FaArrowLeft /> Kembali ke Dashboard
+          </button>
+          <h1 className="text-xl md:text-2xl font-bold text-green-700">✅ Approve Kegiatan UKM</h1>
+        </div>
 
-        <h1 className="text-2xl font-bold text-green-700 mb-6">Approve Kegiatan</h1>
+        {/* Search & Filter */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <div className="flex items-center gap-2 bg-green-100 px-3 py-2 rounded-lg">
+            <FaSearch className="text-green-600" />
+            <input
+              type="text"
+              placeholder="Cari berdasarkan judul..."
+              className="bg-transparent outline-none w-full"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className="border border-green-300 rounded-lg px-3 py-2"
+          >
+            <option value="semua">Semua Status</option>
+            <option value="menunggu">Menunggu</option>
+            <option value="disetujui">Disetujui</option>
+            <option value="ditolak">Ditolak</option>
+          </select>
+        </div>
 
-        {kegiatanList.length === 0 ? (
-          <p className="text-gray-500">Belum ada kegiatan yang diajukan.</p>
+        {filteredList.length === 0 ? (
+          <p className="text-center text-gray-500">Tidak ada kegiatan yang cocok.</p>
         ) : (
-          <div className="space-y-4">
-            {kegiatanList.map((kegiatan) => (
+          <div className="grid gap-4">
+            {filteredList.map((kegiatan) => (
               <div
                 key={kegiatan._id}
-                className="border p-4 rounded-lg shadow-sm bg-white flex justify-between items-center"
+                className="border rounded-xl p-5 shadow-sm bg-white hover:shadow-md transition"
               >
-                <div>
-                  <h2 className="text-lg font-semibold text-green-800">{kegiatan.judul}</h2>
-                  <p className="text-sm text-gray-600">{kegiatan.deskripsi}</p>
-                  <p className="text-xs text-gray-400 mt-1">Tanggal: {new Date(kegiatan.tanggal).toLocaleDateString()}</p>
-                  <p className="text-xs text-gray-500 italic">
-                    UKM: {kegiatan.ukmId?.name || 'Tidak diketahui'} | Status:{' '}
-                    <span className="font-semibold capitalize text-blue-600">
-                      {kegiatan.status || 'menunggu'}
-                    </span>
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleStatusUpdate(kegiatan._id, 'disetujui')}
-                    className="text-green-600 hover:text-green-800 flex items-center gap-1"
-                    title="Setujui"
-                  >
-                    <FaCheckCircle /> Setujui
-                  </button>
-                  <button
-                    onClick={() => handleStatusUpdate(kegiatan._id, 'ditolak')}
-                    className="text-red-600 hover:text-red-800 flex items-center gap-1"
-                    title="Tolak"
-                  >
-                    <FaTimesCircle /> Tolak
-                  </button>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h2 className="text-lg font-semibold text-green-800">{kegiatan.judul}</h2>
+                    <p className="text-sm text-gray-700 mt-1">{kegiatan.deskripsi}</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Tanggal: {new Date(kegiatan.tanggal).toLocaleDateString()}
+                    </p>
+                    <p className="text-xs text-gray-500 italic">
+                      UKM: <span className="font-medium">{kegiatan.ukmId?.name || 'Tidak diketahui'}</span>
+                    </p>
+                    <div className="mt-2">{getStatusBadge(kegiatan.status)}</div>
+                  </div>
+                  <div className="flex gap-2 mt-2 md:mt-0">
+                    <button
+                      onClick={() => handleStatusUpdate(kegiatan._id, 'disetujui')}
+                      className="flex items-center gap-1 px-3 py-1 rounded-lg bg-green-600 hover:bg-green-700 text-white text-sm"
+                    >
+                      <FaCheckCircle /> Setujui
+                    </button>
+                    <button
+                      onClick={() => handleStatusUpdate(kegiatan._id, 'ditolak')}
+                      className="flex items-center gap-1 px-3 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm"
+                    >
+                      <FaTimesCircle /> Tolak
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

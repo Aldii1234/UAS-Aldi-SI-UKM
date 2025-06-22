@@ -148,7 +148,7 @@ export default function DokumentasiPage() {
               <option key={ukm._id} value={ukm._id}>{ukm.name}</option>
             ))}
           </select>
-          <input type="file" onChange={(e) => setFile(e.target.files[0])} />
+          <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files[0])} />
           <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
             {editing ? 'Simpan Perubahan' : 'Upload'}
           </button>
@@ -162,8 +162,8 @@ export default function DokumentasiPage() {
           <ul className="space-y-4">
             {list.map((doc) => (
               <li key={doc._id} className="border p-4 rounded shadow-sm bg-gray-50">
-                <div className="flex justify-between items-center">
-                  <div>
+                <div className="flex justify-between items-start gap-4">
+                  <div className="flex-1">
                     <p className="font-bold text-blue-800">{doc.namaKegiatan}</p>
                     <p className="text-sm text-gray-600">{doc.deskripsi}</p>
                     <p className="text-xs text-gray-500">
@@ -172,15 +172,22 @@ export default function DokumentasiPage() {
                     {doc.filePath && (
                       <a
                         href={doc.filePath}
-                        className="text-blue-500 text-sm underline"
+                        className="text-blue-500 text-sm underline block mt-1"
                         target="_blank"
                         rel="noreferrer"
                       >
                         📄 Lihat File
                       </a>
                     )}
+                    {doc.filePath && (
+                      <img
+                        src={doc.filePath}
+                        alt="Dokumentasi"
+                        className="w-40 h-28 object-cover mt-2 rounded border"
+                      />
+                    )}
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex flex-col gap-2">
                     <button
                       onClick={() => handleEdit(doc)}
                       className="text-yellow-600 hover:text-yellow-800"

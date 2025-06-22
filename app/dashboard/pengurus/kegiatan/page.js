@@ -40,14 +40,9 @@ export default function KegiatanPengurusPage() {
       const data = await res.json()
       if (res.ok && Array.isArray(data)) {
         setKegiatanList(data)
-      } else {
-        console.error('Data bukan array:', data)
-        setKegiatanList([])
       }
     } catch (err) {
-      console.error('Gagal fetch kegiatan:', err)
       Swal.fire('Gagal', 'Gagal memuat data kegiatan.', 'error')
-      setKegiatanList([])
     }
   }
 
@@ -64,7 +59,7 @@ export default function KegiatanPengurusPage() {
   const handleTambah = async () => {
     let judul = '', deskripsi = '', tanggal = '', ukmId = ''
     const { value: confirm } = await Swal.fire({
-      title: 'Tambah Kegiatan Baru',
+      title: 'Tambah Kegiatan',
       html: `
         <input id="swal-input-judul" class="swal2-input" placeholder="Judul Kegiatan">
         <textarea id="swal-input-deskripsi" class="swal2-textarea" placeholder="Deskripsi Kegiatan"></textarea>
@@ -81,12 +76,10 @@ export default function KegiatanPengurusPage() {
         deskripsi = document.getElementById('swal-input-deskripsi').value.trim()
         tanggal = document.getElementById('swal-input-tanggal').value
         ukmId = document.getElementById('swal-input-ukm').value
-
         if (!judul || !deskripsi || !tanggal || !ukmId) {
           Swal.showValidationMessage('Semua isian wajib diisi!')
           return false
         }
-
         return true
       }
     })
@@ -96,18 +89,11 @@ export default function KegiatanPengurusPage() {
     const res = await fetch('/api/kegiatan', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        judul,
-        deskripsi,
-        tanggal,
-        ukmId,
-        pengurus: user._id,
-        status: 'menunggu' // Tambahkan status default
-      }),
+      body: JSON.stringify({ judul, deskripsi, tanggal, ukmId, pengurus: user._id, status: 'pending' })
     })
 
     if (res.ok) {
-      Swal.fire('Berhasil', 'Kegiatan berhasil ditambahkan.', 'success')
+      Swal.fire('Berhasil', 'Kegiatan ditambahkan.', 'success')
       fetchKegiatan()
     } else {
       const err = await res.json()
@@ -121,10 +107,10 @@ export default function KegiatanPengurusPage() {
       html: `
         <input id="swal-edit-judul" class="swal2-input" placeholder="Judul" value="${kegiatan.judul}">
         <textarea id="swal-edit-deskripsi" class="swal2-textarea" placeholder="Deskripsi">${kegiatan.deskripsi}</textarea>
-        <input id="swal-edit-tanggal" type="date" class="swal2-input" value="${kegiatan.tanggal?.split('T')[0] || ''}">
+        <input id="swal-edit-tanggal" type="date" class="swal2-input" value="${kegiatan.tanggal?.split('T')[0]}">
         <select id="swal-edit-ukm" class="swal2-select">
-          ${ukmList.map(
-            (ukm) => `<option value="${ukm._id}" ${ukm._id === kegiatan.ukmId?._id ? 'selected' : ''}>${ukm.name}</option>`
+          ${ukmList.map((ukm) =>
+            `<option value="${ukm._id}" ${ukm._id === kegiatan.ukmId?._id ? 'selected' : ''}>${ukm.name}</option>`
           ).join('')}
         </select>
       `,
@@ -135,12 +121,10 @@ export default function KegiatanPengurusPage() {
         const deskripsi = document.getElementById('swal-edit-deskripsi').value.trim()
         const tanggal = document.getElementById('swal-edit-tanggal').value
         const ukmId = document.getElementById('swal-edit-ukm').value
-
         if (!judul || !deskripsi || !tanggal || !ukmId) {
           Swal.showValidationMessage('Semua isian wajib diisi!')
           return false
         }
-
         return { judul, deskripsi, tanggal, ukmId }
       }
     })
@@ -150,7 +134,7 @@ export default function KegiatanPengurusPage() {
     const res = await fetch(`/api/kegiatan/${kegiatan._id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(confirm),
+      body: JSON.stringify(confirm)
     })
 
     if (res.ok) {
@@ -164,31 +148,34 @@ export default function KegiatanPengurusPage() {
   const handleDelete = async (id) => {
     const confirm = await Swal.fire({
       title: 'Hapus Kegiatan?',
-      text: 'Tindakan ini tidak dapat dibatalkan!',
+      text: 'Tindakan ini tidak bisa dikembalikan!',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Ya, hapus',
+      confirmButtonText: 'Ya, hapus'
     })
 
     if (!confirm.isConfirmed) return
 
     const res = await fetch(`/api/kegiatan/${id}`, {
-      method: 'DELETE',
+      method: 'DELETE'
     })
 
     if (res.ok) {
-      Swal.fire('Berhasil', 'Kegiatan telah dihapus.', 'success')
+      Swal.fire('Berhasil', 'Kegiatan berhasil dihapus.', 'success')
       fetchKegiatan()
     } else {
       Swal.fire('Gagal', 'Gagal menghapus kegiatan.', 'error')
     }
   }
 
-  const getStatusLabel = (status) => {
+  const getStatusBadge = (status) => {
     switch (status) {
-      case 'disetujui': return '✅ Disetujui'
-      case 'ditolak': return '❌ Ditolak'
-      case 'pending': default: return '⏳ pending'
+      case 'disetujui':
+        return <span className="bg-green-100 text-green-700 px-2 py-1 text-xs rounded-full">✅ Disetujui</span>
+      case 'ditolak':
+        return <span className="bg-red-100 text-red-700 px-2 py-1 text-xs rounded-full">❌ Ditolak</span>
+      default:
+        return <span className="bg-yellow-100 text-yellow-700 px-2 py-1 text-xs rounded-full">⏳ Pending</span>
     }
   }
 
@@ -196,11 +183,11 @@ export default function KegiatanPengurusPage() {
 
   return (
     <main className="min-h-screen bg-blue-50 p-6">
-      <div className="max-w-5xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
-        <div className="flex justify-between items-center mb-6">
+      <div className="max-w-6xl mx-auto bg-white p-8 rounded-2xl shadow-xl">
+        <div className="flex justify-between items-center mb-8">
           <button
             onClick={() => router.push('/dashboard/pengurus')}
-            className="text-blue-500 hover:text-blue-700 flex items-center gap-2"
+            className="flex items-center gap-2 text-blue-600 hover:text-blue-800"
           >
             <FaArrowLeft /> Kembali
           </button>
@@ -208,40 +195,36 @@ export default function KegiatanPengurusPage() {
             onClick={handleTambah}
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
           >
-            <FaPlusCircle /> Tambah
+            <FaPlusCircle /> Tambah Kegiatan
           </button>
         </div>
 
-        {Array.isArray(kegiatanList) && kegiatanList.length === 0 ? (
-          <p className="text-gray-500 text-center">Belum ada kegiatan.</p>
+        {kegiatanList.length === 0 ? (
+          <p className="text-center text-gray-500">Belum ada kegiatan.</p>
         ) : (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {kegiatanList.map((kegiatan) => (
               <div
                 key={kegiatan._id}
-                className="border p-4 rounded-lg shadow-sm bg-white flex justify-between items-center"
+                className="bg-white border rounded-xl p-5 shadow hover:shadow-lg transition"
               >
-                <div>
-                  <h2 className="text-lg font-semibold text-blue-800">{kegiatan.judul}</h2>
-                  <p className="text-sm text-gray-600">{kegiatan.deskripsi}</p>
-                  <p className="text-xs text-gray-400">Tanggal: {new Date(kegiatan.tanggal).toLocaleDateString()}</p>
-                  <p className="text-xs text-gray-500 italic">UKM: {kegiatan.ukmId?.name || 'Tidak tersedia'}</p>
-                  <p className="text-sm mt-1 font-semibold text-blue-600">
-                    Status: {getStatusLabel(kegiatan.status)}
-                  </p>
-                </div>
-                <div className="flex gap-3">
+                <h2 className="text-lg font-bold text-blue-700">{kegiatan.judul}</h2>
+                <p className="text-sm text-gray-700 mb-2">{kegiatan.deskripsi}</p>
+                <p className="text-xs text-gray-500">Tanggal: {new Date(kegiatan.tanggal).toLocaleDateString()}</p>
+                <p className="text-xs italic text-gray-400">UKM: {kegiatan.ukmId?.name || 'Tidak tersedia'}</p>
+                <div className="mt-2">{getStatusBadge(kegiatan.status)}</div>
+                <div className="mt-4 flex gap-4">
                   <button
                     onClick={() => handleEdit(kegiatan)}
-                    className="text-yellow-500 hover:text-yellow-700"
                     title="Edit"
+                    className="text-yellow-500 hover:text-yellow-600"
                   >
                     <FaEdit />
                   </button>
                   <button
                     onClick={() => handleDelete(kegiatan._id)}
-                    className="text-red-500 hover:text-red-700"
                     title="Hapus"
+                    className="text-red-500 hover:text-red-600"
                   >
                     <FaTrash />
                   </button>
