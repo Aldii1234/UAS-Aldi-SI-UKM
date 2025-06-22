@@ -1,10 +1,8 @@
 import { NextResponse } from 'next/server'
 import connectDB from '@/lib/db'
 import Dokumentasi from '@/models/Dokumentasi'
-import UKM from '@/models/UKM'
-import User from '@/models/User'
-import { writeFile } from 'fs/promises'
-import path from 'path'
+import cloudinary from '@/lib/cloudinary'
+import streamifier from 'streamifier'
 
 export async function GET() {
   try {
@@ -15,11 +13,9 @@ export async function GET() {
       .populate('pengurus', 'name')
       .sort({ createdAt: -1 })
 
-    // ✅ Berhasil: return list dokumentasi dalam JSON
     return NextResponse.json(docs)
   } catch (err) {
     console.error('[GET Error]', err)
-    // ✅ Gagal: tetap return response JSON valid
     return NextResponse.json({ message: 'Gagal ambil dokumentasi', error: err.message }, { status: 500 })
   }
 }
@@ -39,21 +35,31 @@ export async function POST(req) {
       return NextResponse.json({ message: 'Semua field wajib diisi.' }, { status: 400 })
     }
 
-    if (typeof file.name !== 'string' || typeof file.arrayBuffer !== 'function') {
-      return NextResponse.json({ message: 'Format file tidak valid.' }, { status: 400 })
-    }
-
     const buffer = Buffer.from(await file.arrayBuffer())
-    const fileName = `${Date.now()}-${file.name.replace(/\s+/g, '-')}`
-    const filePath = path.join(process.cwd(), 'public', 'uploads', fileName)
-    await writeFile(filePath, buffer)
+
+    const uploadToCloudinary = () =>
+      new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: 'ukm_dokumentasi',
+          },
+          (error, result) => {
+            if (error) return reject(error)
+            resolve(result)
+          }
+        )
+
+        streamifier.createReadStream(buffer).pipe(uploadStream)
+      })
+
+    const result = await uploadToCloudinary()
 
     const saved = await Dokumentasi.create({
       namaKegiatan,
       deskripsi,
       pengurus,
       ukm,
-      filePath: `/uploads/${fileName}`,
+      filePath: result.secure_url,
     })
 
     return NextResponse.json({ message: 'Berhasil upload', data: saved })
