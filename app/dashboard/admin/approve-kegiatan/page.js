@@ -84,26 +84,28 @@ export default function ApproveKegiatanPage() {
   if (!user) return null
 
   return (
-    <main className="min-h-screen bg-green-50 p-6">
-      <div className="max-w-5xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
-        <div className="flex items-center justify-between mb-6">
+    <main className="min-h-screen bg-green-50 p-4 sm:p-6">
+      <div className="max-w-4xl mx-auto bg-white p-4 sm:p-6 rounded-xl shadow-md">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <button
             onClick={() => router.push('/dashboard/admin')}
-            className="flex items-center gap-2 text-green-700 hover:text-green-900 font-medium"
+            className="flex items-center gap-2 text-green-700 hover:text-green-900 font-medium text-sm sm:text-base"
           >
-            <FaArrowLeft /> Kembali ke Dashboard
+            <FaArrowLeft /> Kembali
           </button>
-          <h1 className="text-xl md:text-2xl font-bold text-green-700">✅ Approve Kegiatan UKM</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-green-700 text-center sm:text-left">
+            Approve Kegiatan UKM
+          </h1>
         </div>
 
         {/* Search & Filter */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-          <div className="flex items-center gap-2 bg-green-100 px-3 py-2 rounded-lg">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+          <div className="flex items-center gap-2 bg-green-100 px-3 py-2 rounded-lg w-full sm:w-auto">
             <FaSearch className="text-green-600" />
             <input
               type="text"
-              placeholder="Cari berdasarkan judul..."
-              className="bg-transparent outline-none w-full"
+              placeholder="Cari judul kegiatan..."
+              className="bg-transparent outline-none w-full sm:w-64 text-sm"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -111,7 +113,7 @@ export default function ApproveKegiatanPage() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="border border-green-300 rounded-lg px-3 py-2"
+            className="border border-green-300 rounded-lg px-3 py-2 text-sm w-full sm:w-auto"
           >
             <option value="semua">Semua Status</option>
             <option value="menunggu">Menunggu</option>
@@ -121,17 +123,17 @@ export default function ApproveKegiatanPage() {
         </div>
 
         {filteredList.length === 0 ? (
-          <p className="text-center text-gray-500">Tidak ada kegiatan yang cocok.</p>
+          <p className="text-center text-gray-500 text-sm">Tidak ada kegiatan ditemukan.</p>
         ) : (
           <div className="grid gap-4">
             {filteredList.map((kegiatan) => (
               <div
                 key={kegiatan._id}
-                className="border rounded-xl p-5 shadow-sm bg-white hover:shadow-md transition"
+                className="border rounded-xl p-4 sm:p-5 bg-white shadow-sm hover:shadow-md transition"
               >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h2 className="text-lg font-semibold text-green-800">{kegiatan.judul}</h2>
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+                  <div className="flex-1">
+                    <h2 className="text-base sm:text-lg font-semibold text-green-800">{kegiatan.judul}</h2>
                     <p className="text-sm text-gray-700 mt-1">{kegiatan.deskripsi}</p>
                     <p className="text-xs text-gray-500 mt-1">
                       Tanggal: {new Date(kegiatan.tanggal).toLocaleDateString()}
@@ -141,16 +143,16 @@ export default function ApproveKegiatanPage() {
                     </p>
                     <div className="mt-2">{getStatusBadge(kegiatan.status)}</div>
                   </div>
-                  <div className="flex gap-2 mt-2 md:mt-0">
+                  <div className="flex flex-row sm:flex-col gap-2 items-center sm:items-end">
                     <button
                       onClick={() => handleStatusUpdate(kegiatan._id, 'disetujui')}
-                      className="flex items-center gap-1 px-3 py-1 rounded-lg bg-green-600 hover:bg-green-700 text-white text-sm"
+                      className="flex items-center gap-1 px-3 py-1 rounded-md bg-green-600 hover:bg-green-700 text-white text-sm"
                     >
                       <FaCheckCircle /> Setujui
                     </button>
                     <button
                       onClick={() => handleStatusUpdate(kegiatan._id, 'ditolak')}
-                      className="flex items-center gap-1 px-3 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm"
+                      className="flex items-center gap-1 px-3 py-1 rounded-md bg-red-600 hover:bg-red-700 text-white text-sm"
                     >
                       <FaTimesCircle /> Tolak
                     </button>
