@@ -85,9 +85,11 @@ export default function DaftarUKMPage() {
   if (!user) return null
 
   return (
-    <main className="p-6 bg-gradient-to-tr from-sky-100 to-blue-50 min-h-screen">
-      <div className="max-w-5xl mx-auto bg-white p-8 rounded-2xl shadow-lg">
-        <h1 className="text-3xl font-bold text-sky-700 mb-6 text-center">🎓 Daftar UKM Masoem University</h1>
+    <main className="p-4 md:p-6 bg-gradient-to-tr from-sky-100 to-blue-50 min-h-screen">
+      <div className="max-w-6xl mx-auto bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+        <h1 className="text-2xl md:text-3xl font-bold text-sky-700 mb-6 text-center">
+          🎓 Daftar UKM Masoem University
+        </h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {ukmList.map((ukm) => (
@@ -96,11 +98,35 @@ export default function DaftarUKMPage() {
               className="bg-white border rounded-xl p-5 shadow-md hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex flex-col justify-between"
             >
               <div>
-                <h2 className="text-xl font-semibold text-sky-800 mb-1">{ukm.name}</h2>
-                <p className="text-sm text-gray-600 mb-3">{ukm.description}</p>
+                <h2 className="text-lg font-semibold text-sky-800">{ukm.name}</h2>
+                <p className="text-sm text-gray-600">{ukm.description}</p>
+
+                {ukm.profile && (
+                  <p className="text-xs text-gray-700 mt-2">
+                    <strong>Profil:</strong> {ukm.profile}
+                  </p>
+                )}
+
+                {ukm.visi && (
+                  <p className="text-xs text-gray-700 mt-2">
+                    <strong>Visi:</strong> {ukm.visi}
+                  </p>
+                )}
+
+                {ukm.misi && (
+                  <div className="text-xs text-gray-700 mt-2">
+                    <strong>Misi:</strong>
+                    <ul className="list-disc ml-4 mt-1">
+                      {ukm.misi.split('\n').map((misiItem, idx) => (
+                        <li key={idx}>{misiItem.replace(/^\d+\.\s*/, '')}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
+
               <button
-                className="mt-auto bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-700 text-sm transition"
+                className="mt-4 bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-700 text-sm transition"
                 onClick={() => handleGabung(ukm._id, ukm.name)}
               >
                 ✋ Gabung UKM

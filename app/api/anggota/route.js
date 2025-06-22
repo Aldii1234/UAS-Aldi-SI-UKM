@@ -5,21 +5,16 @@ export async function GET(req) {
   try {
     await connectDB()
     const { searchParams } = new URL(req.url)
-    const userId = searchParams.get('userId')  // ambil userId dari query
+    const userId = searchParams.get('userId')
     const status = searchParams.get('status')
 
-    // Validasi
-    if (!userId) {
-      return Response.json({ message: 'User ID diperlukan' }, { status: 400 })
-    }
-
-    // Filter berdasarkan user login dan status (jika ada)
-    const filter = { user: userId }
+    const filter = {}
+    if (userId) filter.user = userId
     if (status) filter.status = status
 
     const data = await AnggotaUKM.find(filter)
-      .populate('user', 'name email')   // tampilkan nama & email user
-      .populate('ukm', 'name')          // tampilkan nama UKM
+      .populate('user', 'name email')
+      .populate('ukm', 'name')
 
     return Response.json(data)
   } catch (err) {

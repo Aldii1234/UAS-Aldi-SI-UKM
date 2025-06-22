@@ -5,9 +5,17 @@ import { useParams, useRouter } from 'next/navigation'
 import Swal from 'sweetalert2'
 
 export default function EditUKMPage() {
-  const { id } = useParams()
+  const params = useParams()
   const router = useRouter()
-  const [form, setForm] = useState({ name: '', description: '' })
+  const { id } = params
+
+  const [form, setForm] = useState({
+    name: '',
+    description: '',
+    profile: '',
+    visi: '',
+    misi: '',
+  })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -16,7 +24,13 @@ export default function EditUKMPage() {
         const res = await fetch(`/api/ukm/${id}`)
         if (!res.ok) throw new Error('Gagal mengambil data UKM.')
         const data = await res.json()
-        setForm({ name: data.name, description: data.description })
+        setForm({
+          name: data.name || '',
+          description: data.description || '',
+          profile: data.profile || '',
+          visi: data.visi || '',
+          misi: data.misi || '',
+        })
         setLoading(false)
       } catch (error) {
         Swal.fire('Error', error.message, 'error')
@@ -87,7 +101,43 @@ export default function EditUKMPage() {
               value={form.description}
               onChange={handleChange}
               required
-              rows="4"
+              rows="3"
+              className="w-full border rounded px-4 py-2"
+            ></textarea>
+          </div>
+
+          <div className="mb-4">
+            <label className="block mb-1 font-medium">Profil UKM</label>
+            <textarea
+              name="profile"
+              value={form.profile}
+              onChange={handleChange}
+              required
+              rows="3"
+              className="w-full border rounded px-4 py-2"
+            ></textarea>
+          </div>
+
+          <div className="mb-4">
+            <label className="block mb-1 font-medium">Visi</label>
+            <textarea
+              name="visi"
+              value={form.visi}
+              onChange={handleChange}
+              required
+              rows="2"
+              className="w-full border rounded px-4 py-2"
+            ></textarea>
+          </div>
+
+          <div className="mb-4">
+            <label className="block mb-1 font-medium">Misi</label>
+            <textarea
+              name="misi"
+              value={form.misi}
+              onChange={handleChange}
+              required
+              rows="3"
               className="w-full border rounded px-4 py-2"
             ></textarea>
           </div>

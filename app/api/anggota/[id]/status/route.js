@@ -2,10 +2,10 @@ import connectDB from '@/lib/db'
 import AnggotaUKM from '@/models/AnggotaUKM'
 
 // Handler PUT untuk mengubah status anggota
-export async function PUT(req, { params }) {
+export async function PUT(req, context) {
   try {
     await connectDB()
-    const { id } = params
+    const { id } = context.params
     const { status } = await req.json()
 
     const allowed = ['pending', 'disetujui', 'ditolak']
@@ -30,10 +30,10 @@ export async function PUT(req, { params }) {
 }
 
 // Handler DELETE untuk membatalkan pendaftaran (jika masih pending)
-export async function DELETE(req, { params }) {
-  const { id } = params
+export async function DELETE(req, context) {
   try {
     await connectDB()
+    const { id } = context.params
 
     const anggota = await AnggotaUKM.findById(id)
     if (!anggota) {
