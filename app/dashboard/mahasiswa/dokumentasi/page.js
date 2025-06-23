@@ -73,12 +73,23 @@ export default function DokumentasiMahasiswaPage() {
                 className="bg-gray-50 border rounded-lg shadow-sm overflow-hidden"
               >
                 {doc.filePath && (
-                  <img
-                    src={doc.filePath}
-                    alt="Dokumentasi"
-                    className="w-full h-52 object-cover"
-                  />
+                  doc.filePath.endsWith('.mp4') ? (
+                    <video
+                      controls
+                      src={doc.filePath}
+                      className="w-full h-52 object-cover bg-black"
+                    />
+                  ) : (
+                    <a href={doc.filePath} target="_blank" rel="noreferrer">
+                      <img
+                        src={doc.filePath}
+                        alt={doc.namaKegiatan}
+                        className="w-full h-52 object-cover hover:opacity-90 transition"
+                      />
+                    </a>
+                  )
                 )}
+
                 <div className="p-4">
                   <p className="font-bold text-blue-800">{doc.namaKegiatan}</p>
                   <p className="text-sm text-gray-600">{doc.deskripsi}</p>
