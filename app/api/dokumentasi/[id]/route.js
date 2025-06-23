@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server'
 import connectDB from '@/lib/db'
 import Dokumentasi from '@/models/Dokumentasi'
-import { writeFile } from 'fs/promises'
-import path from 'path'
-import { mkdir } from 'fs/promises'
+import cloudinary from '@/lib/cloudinary'
+import streamifier from 'streamifier'
 
-// PUT: Edit dokumentasi
 export async function PUT(req, { params }) {
   try {
     await connectDB()
@@ -25,25 +23,46 @@ export async function PUT(req, { params }) {
       namaKegiatan,
       deskripsi,
       pengurus,
-      ukm
+      ukm,
     }
 
-    // Jika ada file baru diupload
-    if (file && typeof file === 'object') {
+    if (file && typeof file === 'object' && file.size > 0) {
       const buffer = Buffer.from(await file.arrayBuffer())
-      const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'dokumentasi')
 
-      await mkdir(uploadDir, { recursive: true })
+      // Validasi mime type
+      if (
+        !file.type.startsWith('image/') &&
+        !file.type.startsWith('video/')
+      ) {
+        return NextResponse.json(
+          { message: 'Hanya file gambar atau video yang diperbolehkan' },
+          { status: 400 }
+        )
+      }
 
-      const filename = `${Date.now()}-${file.name.replace(/\s/g, '_')}`
-      const filePath = path.join(uploadDir, filename)
-      const publicPath = `/uploads/dokumentasi/${filename}`
+      // Upload ke Cloudinary
+      const uploadToCloudinary = () =>
+        new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            {
+              folder: 'ukm_dokumentasi',
+              resource_type: file.type.startsWith('video/') ? 'video' : 'image',
+            },
+            (error, result) => {
+              if (error) return reject(error)
+              resolve(result)
+            }
+          )
+          streamifier.createReadStream(buffer).pipe(uploadStream)
+        })
 
-      await writeFile(filePath, buffer)
-      updateData.filePath = publicPath
+      const result = await uploadToCloudinary()
+      updateData.filePath = result.secure_url
     }
 
-    const updated = await Dokumentasi.findByIdAndUpdate(params.id, updateData, { new: true })
+    const updated = await Dokumentasi.findByIdAndUpdate(params.id, updateData, {
+      new: true,
+    })
 
     if (!updated) {
       return NextResponse.json({ message: 'Dokumentasi tidak ditemukan' }, { status: 404 })
@@ -52,11 +71,10 @@ export async function PUT(req, { params }) {
     return NextResponse.json({ message: 'Dokumentasi berhasil diperbarui', data: updated })
   } catch (err) {
     console.error('Edit error:', err)
-    return NextResponse.json({ message: 'Gagal memperbarui dokumentasi' }, { status: 500 })
+    return NextResponse.json({ message: 'Gagal memperbarui dokumentasi', error: err.message }, { status: 500 })
   }
 }
 
-// DELETE: Hapus dokumentasi
 export async function DELETE(req, { params }) {
   try {
     await connectDB()
@@ -70,6 +88,6 @@ export async function DELETE(req, { params }) {
     return NextResponse.json({ message: 'Dokumentasi berhasil dihapus' })
   } catch (err) {
     console.error('Delete error:', err)
-    return NextResponse.json({ message: 'Gagal menghapus dokumentasi' }, { status: 500 })
+    return NextResponse.json({ message: 'Gagal menghapus dokumentasi', error: err.message }, { status: 500 })
   }
 }
